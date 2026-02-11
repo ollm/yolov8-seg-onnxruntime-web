@@ -15,7 +15,7 @@ const App = () => {
   const canvasRef = useRef(null);
 
   // configs
-  const modelName = "yolov8n-seg.onnx";
+  const modelName = "yolo26n-seg.onnx";
   const modelInputShape = [1, 3, 640, 640];
   const topk = 100;
   const iouThreshold = 0.45;
@@ -28,7 +28,7 @@ const App = () => {
     // create session
     const arrBufNet = await download(
       `${baseModelURL}/${modelName}`, // url
-      ["Loading YOLOv8 Segmentation model", setLoading] // logger
+      ["Loading YOLO26 Segmentation model", setLoading] // logger
     );
     const yolov8 = await InferenceSession.create(arrBufNet);
     const arrBufNMS = await download(
@@ -63,9 +63,9 @@ const App = () => {
         </Loader>
       )}
       <div className="header">
-        <h1>YOLOv8 Object Segmentation App</h1>
+        <h1>YOLO26 Object Segmentation App</h1>
         <p>
-          YOLOv8 object detection application live on browser powered by{" "}
+          YOLO26 object detection application live on browser powered by{" "}
           <code>onnxruntime-web</code>
         </p>
         <p>

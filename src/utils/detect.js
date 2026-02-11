@@ -10,7 +10,7 @@ const numClass = labels.length;
  * Detect Image
  * @param {HTMLImageElement} image Image to detect
  * @param {HTMLCanvasElement} canvas canvas to draw boxes
- * @param {ort.InferenceSession} session YOLOv8 onnxruntime session
+ * @param {ort.InferenceSession} session YOLO26 onnxruntime session
  * @param {Number} topk Integer representing the maximum number of boxes to be selected per class
  * @param {Number} iouThreshold Float representing the threshold for deciding whether boxes overlap too much with respect to IOU
  * @param {Number} scoreThreshold Float representing the threshold for deciding when to remove boxes based on score
