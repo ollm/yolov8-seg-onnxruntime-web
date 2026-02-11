@@ -1,4 +1,4 @@
-# YOLOv8 Segmentation with onnxruntime-web
+# YOLO26 Segmentation with onnxruntime-web
 
 <p align="center">
   <img src="./sample.png" />
@@ -12,7 +12,7 @@
 ---
 
 Object Segmentation application right in your browser.
-Serving YOLOv8 segmentation in browser using onnxruntime-web with `wasm` backend.
+Serving YOLO26 segmentation in browser using onnxruntime-web with `wasm` backend.
 
 ## Setup
 
@@ -33,10 +33,10 @@ yarn build # Build for productions
 
 **Main Model**
 
-YOLOv8n-seg model converted to onnx.
+YOLO26n-seg model converted to onnx.
 
 ```
-used model : yolov8n-seg.onnx
+used model : yolo26n-seg.onnx
 size       : 14 Mb
 ```
 
@@ -52,30 +52,32 @@ ONNX model to produce mask for every object detected [CUSTOM].
 
 [![mask-yolov8-seg.onnx](https://img.shields.io/badge/mask--yolov8--seg.onnx-black?logo=onnx)](https://netron.app/?url=https://raw.githubusercontent.com/Hyuto/yolov8-seg-onnxruntime-web/master/public/model/mask-yolov8-seg.onnx)
 
+> **Note:** YOLO26-seg models are fully compatible with the YOLOv8 inference pipeline. The NMS and mask post-processing models (`nms-yolov8.onnx` and `mask-yolov8-seg.onnx`) work seamlessly with YOLO26 models as they operate on the standard YOLO output format.
+
 ## Use another model
 
-> :warning: **Size Overload** : used YOLOv8 segmentation model in this repo is the smallest with size of 14 MB, so other models is definitely bigger than this which can cause memory problems on browser.
+> :warning: **Size Overload** : used YOLO26 segmentation model in this repo is the smallest with size of 14 MB, so other models is definitely bigger than this which can cause memory problems on browser.
 
-Use another YOLOv8 model.
+Use another YOLO26 model.
 
-1. Export YOLOv8 model to onnx format. Read more on the [official documentation](https://docs.ultralytics.com/tasks/segmentation/#export)
+1. Export YOLO26 model to onnx format. Read more on the [official documentation](https://docs.ultralytics.com/tasks/segmentation/#export)
 
    ```python
    from ultralytics import YOLO
 
    # Load a model
-   model = YOLO("yolov8*-seg.pt")  # load an official yolov8* model
+   model = YOLO("yolo26*-seg.pt")  # load an official yolo26* model
 
    # Export the model
    model.export(format="onnx")
    ```
 
-2. Copy `yolov8*.onnx` to `./public/model`
+2. Copy `yolo26*.onnx` to `./public/model`
 3. Update `modelName` in `App.jsx` to new model name
    ```jsx
    ...
    // configs
-   const modelName = "yolov8*-seg.onnx";
+   const modelName = "yolo26*-seg.onnx";
    const modelInputShape = [1, 3, 640, 640];
    const topk = 100;
    const iouThreshold = 0.45;
@@ -84,9 +86,9 @@ Use another YOLOv8 model.
    ```
 4. Done! 😊
 
-**Note: Custom Trained YOLOv8 Segmentation Models**
+**Note: Custom Trained YOLO26 Segmentation Models**
 
-Please update `src/utils/labels.json` with your YOLOv8 Segmentation classes.
+Please update `src/utils/labels.json` with your YOLO26 Segmentation classes.
 
 ## Reference
 
