@@ -30,7 +30,7 @@ const App = () => {
       `${baseModelURL}/${modelName}`, // url
       ["Loading YOLO26 Segmentation model", setLoading] // logger
     );
-    const yolov8 = await InferenceSession.create(arrBufNet);
+    const model = await InferenceSession.create(arrBufNet);
     const arrBufNMS = await download(
       `${baseModelURL}/nms-yolov8.onnx`, // url
       ["Loading NMS model", setLoading] // logger
@@ -49,9 +49,9 @@ const App = () => {
       new Float32Array(modelInputShape.reduce((a, b) => a * b)),
       modelInputShape
     );
-    await yolov8.run({ images: tensor });
+    await model.run({ images: tensor });
 
-    setSession({ net: yolov8, nms: nms, mask: mask });
+    setSession({ net: model, nms: nms, mask: mask });
     setLoading(null);
   };
 

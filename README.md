@@ -52,6 +52,8 @@ ONNX model to produce mask for every object detected [CUSTOM].
 
 [![mask-yolov8-seg.onnx](https://img.shields.io/badge/mask--yolov8--seg.onnx-black?logo=onnx)](https://netron.app/?url=https://raw.githubusercontent.com/Hyuto/yolov8-seg-onnxruntime-web/master/public/model/mask-yolov8-seg.onnx)
 
+> **Note:** YOLO26-seg models are fully compatible with the YOLOv8 inference pipeline. The NMS and mask post-processing models (`nms-yolov8.onnx` and `mask-yolov8-seg.onnx`) work seamlessly with YOLO26 models as they operate on the standard YOLO output format.
+
 ## Use another model
 
 > :warning: **Size Overload** : used YOLO26 segmentation model in this repo is the smallest with size of 14 MB, so other models is definitely bigger than this which can cause memory problems on browser.
