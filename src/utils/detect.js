@@ -5,8 +5,9 @@ import labels from "./labels.json";
 const colors = new Colors();
 const numClass = labels.length;
 
-// Access Tensor from the window.electron.ort exposed by preload
-const Tensor = window.electron?.ort?.Tensor;
+// Access Tensor from onnxruntime-node
+const ort = window.require ? window.require('onnxruntime-node') : null;
+const Tensor = ort ? ort.Tensor : null;
 
 /**
  * Detect Image

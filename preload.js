@@ -1,17 +1,7 @@
-const { contextBridge, ipcRenderer } = require('electron');
+// With nodeIntegration enabled, the renderer process can directly require Node.js modules
+// This preload script is kept for potential future use
+const path = require('path');
 
-// Expose protected methods that allow the renderer process to use
-// the ipcRenderer without exposing the entire object
-contextBridge.exposeInMainWorld(
-  'electron',
-  {
-    loadModel: (modelName) => ipcRenderer.invoke('load-model', modelName),
-    getModelPath: (modelName) => ipcRenderer.invoke('get-model-path', modelName),
-    readFile: (filePath) => ipcRenderer.invoke('read-file', filePath),
-    // Add onnxruntime-node API exposure
-    ort: {
-      InferenceSession: require('onnxruntime-node').InferenceSession,
-      Tensor: require('onnxruntime-node').Tensor
-    }
-  }
-);
+window.getModelPath = (modelName) => {
+  return path.join(__dirname, 'public', 'model', modelName);
+};

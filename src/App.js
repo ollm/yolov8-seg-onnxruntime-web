@@ -2,8 +2,10 @@ import React, { useState, useRef } from "react";
 import cv from "@techstark/opencv-js";
 import Loader from "./components/loader";
 import { detectImage } from "./utils/detect";
-import { download } from "./utils/download";
 import "./style/App.css";
+
+const path = window.require ? window.require('path') : null;
+const ort = window.require ? window.require('onnxruntime-node') : null;
 
 const App = () => {
   const [session, setSession] = useState(null);
@@ -20,42 +22,40 @@ const App = () => {
   const iouThreshold = 0.45;
   const scoreThreshold = 0.25;
 
-  // Access ONNX Runtime from Electron's exposed API
-  const InferenceSession = window.electron?.ort?.InferenceSession;
-  const Tensor = window.electron?.ort?.Tensor;
-
   // wait until opencv.js initialized
   cv["onRuntimeInitialized"] = async () => {
     try {
-      // Get model paths from Electron
-      const yolov8Path = await download(
-        modelName,
-        ["Loading YOLOv8 Segmentation model", setLoading]
-      );
-      const nmsPath = await download(
-        "nms-yolov8.onnx",
-        ["Loading NMS model", setLoading]
-      );
-      const maskPath = await download(
-        "mask-yolov8-seg.onnx",
-        ["Loading Mask model", setLoading]
-      );
+      // Get model paths for Electron
+      const getModelPath = (name) => {
+        if (path) {
+          return path.join(window.__dirname || __dirname, 'public', 'model', name);
+        }
+        return `./model/${name}`;
+      };
 
-      // Create sessions using onnxruntime-node through Electron
-      setLoading({ text: "Creating model sessions...", progress: null });
-      const yolov8 = await InferenceSession.create(yolov8Path, {
+      const yolov8Path = getModelPath(modelName);
+      const nmsPath = getModelPath("nms-yolov8.onnx");
+      const maskPath = getModelPath("mask-yolov8-seg.onnx");
+
+      // Create sessions using onnxruntime-node
+      setLoading({ text: "Loading YOLOv8 Segmentation model...", progress: null });
+      const yolov8 = await ort.InferenceSession.create(yolov8Path, {
         executionProviders: ['cpu']
       });
-      const nms = await InferenceSession.create(nmsPath, {
+      
+      setLoading({ text: "Loading NMS model...", progress: null });
+      const nms = await ort.InferenceSession.create(nmsPath, {
         executionProviders: ['cpu']
       });
-      const mask = await InferenceSession.create(maskPath, {
+      
+      setLoading({ text: "Loading Mask model...", progress: null });
+      const mask = await ort.InferenceSession.create(maskPath, {
         executionProviders: ['cpu']
       });
 
       // warmup main model
       setLoading({ text: "Warming up model...", progress: null });
-      const tensor = new Tensor(
+      const tensor = new ort.Tensor(
         "float32",
         new Float32Array(modelInputShape.reduce((a, b) => a * b)),
         modelInputShape
