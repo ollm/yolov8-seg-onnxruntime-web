@@ -1,32 +1,25 @@
-export const download = (url, logger = null) => {
-  return new Promise((resolve, reject) => {
-    const request = new XMLHttpRequest();
-    request.open("GET", url, true);
-    request.responseType = "arraybuffer";
+const path = require('path');
+
+export const download = async (modelPath, logger = null) => {
+  try {
     if (logger) {
       const [log, setState] = logger;
-      request.onprogress = (e) => {
-        const progress = (e.loaded / e.total) * 100;
-        setState({ text: log, progress: progress.toFixed(2) });
-      };
+      setState({ text: log, progress: null });
     }
-    request.onload = function () {
-      if (this.status >= 200 && this.status < 300) {
-        resolve(request.response);
-      } else {
-        reject({
-          status: this.status,
-          statusText: request.statusText,
-        });
-      }
-      resolve(request.response);
-    };
-    request.onerror = function () {
-      reject({
-        status: this.status,
-        statusText: request.statusText,
-      });
-    };
-    request.send();
-  });
+
+    // In Electron, we load models directly from the file system
+    // Get the model path from the main process
+    const fileName = path.basename(modelPath);
+    const modelData = await window.electron.getModelPath(fileName);
+    
+    if (logger) {
+      const [log, setState] = logger;
+      setState({ text: `${log} - Complete`, progress: 100 });
+    }
+
+    return modelData;
+  } catch (error) {
+    console.error('Error loading model:', error);
+    throw error;
+  }
 };

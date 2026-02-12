@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import cv from "@techstark/opencv-js";
-import { Tensor, InferenceSession } from "onnxruntime-web";
 import Loader from "./components/loader";
 import { detectImage } from "./utils/detect";
 import { download } from "./utils/download";
@@ -21,38 +20,54 @@ const App = () => {
   const iouThreshold = 0.45;
   const scoreThreshold = 0.25;
 
+  // Access ONNX Runtime from Electron's exposed API
+  const InferenceSession = window.electron?.ort?.InferenceSession;
+  const Tensor = window.electron?.ort?.Tensor;
+
   // wait until opencv.js initialized
   cv["onRuntimeInitialized"] = async () => {
-    const baseModelURL = `${process.env.PUBLIC_URL}/model`;
+    try {
+      // Get model paths from Electron
+      const yolov8Path = await download(
+        modelName,
+        ["Loading YOLOv8 Segmentation model", setLoading]
+      );
+      const nmsPath = await download(
+        "nms-yolov8.onnx",
+        ["Loading NMS model", setLoading]
+      );
+      const maskPath = await download(
+        "mask-yolov8-seg.onnx",
+        ["Loading Mask model", setLoading]
+      );
 
-    // create session
-    const arrBufNet = await download(
-      `${baseModelURL}/${modelName}`, // url
-      ["Loading YOLOv8 Segmentation model", setLoading] // logger
-    );
-    const yolov8 = await InferenceSession.create(arrBufNet);
-    const arrBufNMS = await download(
-      `${baseModelURL}/nms-yolov8.onnx`, // url
-      ["Loading NMS model", setLoading] // logger
-    );
-    const nms = await InferenceSession.create(arrBufNMS);
-    const arrBufMask = await download(
-      `${baseModelURL}/mask-yolov8-seg.onnx`, // url
-      ["Loading Mask model", setLoading] // logger
-    );
-    const mask = await InferenceSession.create(arrBufMask);
+      // Create sessions using onnxruntime-node through Electron
+      setLoading({ text: "Creating model sessions...", progress: null });
+      const yolov8 = await InferenceSession.create(yolov8Path, {
+        executionProviders: ['cpu']
+      });
+      const nms = await InferenceSession.create(nmsPath, {
+        executionProviders: ['cpu']
+      });
+      const mask = await InferenceSession.create(maskPath, {
+        executionProviders: ['cpu']
+      });
 
-    // warmup main model
-    setLoading({ text: "Warming up model...", progress: null });
-    const tensor = new Tensor(
-      "float32",
-      new Float32Array(modelInputShape.reduce((a, b) => a * b)),
-      modelInputShape
-    );
-    await yolov8.run({ images: tensor });
+      // warmup main model
+      setLoading({ text: "Warming up model...", progress: null });
+      const tensor = new Tensor(
+        "float32",
+        new Float32Array(modelInputShape.reduce((a, b) => a * b)),
+        modelInputShape
+      );
+      await yolov8.run({ images: tensor });
 
-    setSession({ net: yolov8, nms: nms, mask: mask });
-    setLoading(null);
+      setSession({ net: yolov8, nms: nms, mask: mask });
+      setLoading(null);
+    } catch (error) {
+      console.error("Error initializing models:", error);
+      setLoading({ text: `Error: ${error.message}`, progress: null });
+    }
   };
 
   return (
@@ -65,8 +80,8 @@ const App = () => {
       <div className="header">
         <h1>YOLOv8 Object Segmentation App</h1>
         <p>
-          YOLOv8 object detection application live on browser powered by{" "}
-          <code>onnxruntime-web</code>
+          YOLOv8 object detection application running on Electron powered by{" "}
+          <code>onnxruntime-node</code>
         </p>
         <p>
           Serving : <code className="code">{modelName}</code>

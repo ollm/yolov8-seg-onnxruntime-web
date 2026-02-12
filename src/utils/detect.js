@@ -1,10 +1,12 @@
 import cv from "@techstark/opencv-js";
-import { Tensor } from "onnxruntime-web";
 import { renderBoxes, Colors } from "./renderBox";
 import labels from "./labels.json";
 
 const colors = new Colors();
 const numClass = labels.length;
+
+// Access Tensor from the window.electron.ort exposed by preload
+const Tensor = window.electron?.ort?.Tensor;
 
 /**
  * Detect Image
