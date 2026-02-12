@@ -10,6 +10,13 @@
 
 # production
 /build
+/dist
+
+# Electron
+/out
+*.dmg
+*.exe
+*.AppImage
 
 # misc
 .DS_Store

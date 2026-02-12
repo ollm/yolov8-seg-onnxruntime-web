@@ -1,10 +1,21 @@
 import cv from "@techstark/opencv-js";
-import { Tensor } from "onnxruntime-web";
 import { renderBoxes, Colors } from "./renderBox";
 import labels from "./labels.json";
 
 const colors = new Colors();
 const numClass = labels.length;
+
+/**
+ * Get Tensor constructor from onnxruntime-node
+ * @returns {Function} Tensor constructor
+ */
+const getTensor = () => {
+  if (!window.require) {
+    throw new Error("Node.js require not available. Must run in Electron.");
+  }
+  const ort = window.require('onnxruntime-node');
+  return ort.Tensor;
+};
 
 /**
  * Detect Image
@@ -25,6 +36,8 @@ export const detectImage = async (
   scoreThreshold,
   inputShape
 ) => {
+  const Tensor = getTensor();
+  
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clean canvas
 
