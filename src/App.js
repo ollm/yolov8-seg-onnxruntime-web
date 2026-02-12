@@ -13,7 +13,7 @@ const App = () => {
   const canvasRef = useRef(null);
 
   // configs
-  const modelName = "yolov8n-seg.onnx";
+  const modelName = "yolo26n-seg.onnx";
   const modelInputShape = [1, 3, 640, 640];
   const topk = 100;
   const iouThreshold = 0.45;
