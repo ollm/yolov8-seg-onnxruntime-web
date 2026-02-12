@@ -1,10 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import cv from "@techstark/opencv-js";
 import Loader from "./components/loader";
 import { detectImage } from "./utils/detect";
 import "./style/App.css";
-
-const ort = window.require ? window.require('onnxruntime-node') : null;
 
 const App = () => {
   const [session, setSession] = useState(null);
@@ -21,9 +19,26 @@ const App = () => {
   const iouThreshold = 0.45;
   const scoreThreshold = 0.25;
 
+  // Check if running in Electron environment
+  useEffect(() => {
+    if (!window.require) {
+      setLoading({ 
+        text: "Error: This application must be run in Electron environment", 
+        progress: null 
+      });
+    }
+  }, []);
+
   // wait until opencv.js initialized
   cv["onRuntimeInitialized"] = async () => {
     try {
+      // Verify Electron environment
+      if (!window.require || !window.getModelPath) {
+        throw new Error("Electron environment not available");
+      }
+
+      const ort = window.require('onnxruntime-node');
+      
       // Use the getModelPath function from preload script
       const yolov8Path = window.getModelPath(modelName);
       const nmsPath = window.getModelPath("nms-yolov8.onnx");
