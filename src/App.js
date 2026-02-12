@@ -4,7 +4,6 @@ import Loader from "./components/loader";
 import { detectImage } from "./utils/detect";
 import "./style/App.css";
 
-const path = window.require ? window.require('path') : null;
 const ort = window.require ? window.require('onnxruntime-node') : null;
 
 const App = () => {
@@ -25,17 +24,12 @@ const App = () => {
   // wait until opencv.js initialized
   cv["onRuntimeInitialized"] = async () => {
     try {
-      // Get model paths for Electron
-      const getModelPath = (name) => {
-        if (path) {
-          return path.join(window.__dirname || __dirname, 'public', 'model', name);
-        }
-        return `./model/${name}`;
-      };
+      // Use the getModelPath function from preload script
+      const yolov8Path = window.getModelPath(modelName);
+      const nmsPath = window.getModelPath("nms-yolov8.onnx");
+      const maskPath = window.getModelPath("mask-yolov8-seg.onnx");
 
-      const yolov8Path = getModelPath(modelName);
-      const nmsPath = getModelPath("nms-yolov8.onnx");
-      const maskPath = getModelPath("mask-yolov8-seg.onnx");
+      console.log('Loading models from:', yolov8Path);
 
       // Create sessions using onnxruntime-node
       setLoading({ text: "Loading YOLOv8 Segmentation model...", progress: null });
